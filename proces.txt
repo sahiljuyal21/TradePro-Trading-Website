@@ -1,0 +1,92 @@
+TradePro Project Handoff Log
+===========================
+
+Updated: 2026-11-06 12:28:54 +05:30
+Workspace: c:\Users\MY PC\Desktop\crazy_website
+
+Changes made
+------------
+- 2026-11-06, approximately 11:27 +05:30: Fixed the portfolio API in
+  backend/server.js. It previously queried a SQLite `stocks` table that does
+  not exist. The handler now reads holdings from SQLite and gets current stock
+  names and prices from the backend's in-memory `stocks` data.
+- 2026-11-06, approximately 11:26 +05:30: Created a local demo user in
+  backend/trading.db: demo@tradepro.test (name: Demo Trader). The database
+  initializes new users with $100,000 cash. The password was shared in the
+  conversation and is intentionally not stored in this project file.
+- 2026-11-06, 11:30 +05:30: Added this handoff log.
+- 2026-11-06, approximately 11:45 +05:30: Added a Node integration test suite
+  in backend/server.test.js and an `npm test` command. Tests launch the API with
+  a temporary database and an ephemeral port; they do not touch trading.db.
+- 2026-11-06, approximately 11:46 +05:30: Added server-side registration
+  validation (valid email, nonempty name, password length of at least eight)
+  and normalized email casing/whitespace for registration and login.
+- 2026-11-06, approximately 11:47 +05:30: Added order validation for supported
+  side/type, positive integer quantities, valid limit prices, and normalized
+  symbols before account records are changed.
+- 2026-11-06, approximately 11:48 +05:30: Fixed the limit-order price display
+  in frontend/src/components/OrderForm.js, which crashed when formatting the
+  input string as a number.
+- 2026-11-06, approximately 11:49 +05:30: Fixed frontend/src/pages/Orders.js
+  to import the shared Input component that it renders.
+- 2026-11-06, approximately 11:50 +05:30: Added four OrderForm Jest tests for
+  zero quantity, market buy, limit price validation/submission, and excess sell
+  quantity.
+- 2026-11-06, 11:52 +05:30: Restarted the live backend with the validated
+  source. Verified normalized demo login, $100,000 portfolio balance, and HTTP
+  400 rejection of a zero-quantity order without changing account data.
+- 2026-11-06, approximately 12:28 +05:30: Fixed the profile dropdown in
+  frontend/src/components/Layout.js. It now starts hidden, toggles from the
+  profile button, and closes on outside click or Escape. Added two tests in
+  frontend/src/components/Layout.test.js.
+
+Verification performed
+----------------------
+- At the start of this run, frontend Jest had no test files; four OrderForm
+  tests were added and now pass.
+- Backend JavaScript syntax check passed.
+- Backend `npm test` passed all seven integration flows: registration and login,
+  auth/token handling, stock list/detail/history, portfolio, buy/partial sell/
+  full sell accounting, watchlist idempotence, and invalid-order rejection.
+- Frontend Jest passed all six tests across OrderForm and Header profile-menu
+  behavior.
+- Frontend production build completed successfully after the profile-menu fix.
+- Backend HTTP checks passed: stock list returned 10 entries, AAPL detail
+  responded, an unknown stock returned 404, and unauthenticated portfolio
+  access returned 401.
+- Demo account login was verified through both the API and browser.
+- Portfolio API returned balance and total value of 100000 with zero holdings.
+  The dashboard displayed the $100,000 starting balance after the fix.
+- Login and registration pages rendered in the browser; the registration form
+  was checked at a 390x844 viewport. Signed-out access to /dashboard redirected
+  to /login.
+- Authenticated Market, Portfolio, Orders, and Watchlist routes all rendered
+  with no uncaught browser page errors. Order History and Transactions empty
+  states rendered, and a valid limit price displayed without submitting a
+  trade.
+- After the live backend restart, the dashboard still displayed the demo
+  account and $100,000 balance; changing market prices confirmed the live page
+  resumed stock updates after development-mode reconnects.
+- Browser verification confirmed the profile menu is hidden on page load,
+  opens on profile click, and closes on outside click or Escape.
+- Backend WebSocket handshake and initial stock update were verified with a
+  Node client. Browser development mode can log a transient reconnect during
+  React Strict Mode or server restart. React Router also prints future-flag
+  warnings; neither prevented the checks above from passing.
+
+Run the app
+-----------
+- Backend: from backend/, run `npm start` (API and WebSocket on port 3001).
+- Frontend: from frontend/, run `npm start` (web app on port 3000).
+- Open http://localhost:3000/login.
+- Local demo account email: demo@tradepro.test. Retrieve the password from the
+  conversation that created the account; do not use this demo account in a
+  production environment.
+
+Notes for the next agent
+------------------------
+- The local database is backend/trading.db; the demo user is stored there.
+- Backend tests use a temporary SQLite file configured through `DATABASE_PATH`.
+- Frontend Jest currently has four OrderForm component tests; most other page
+  checks above were performed through the browser smoke test.
+- Keep credentials and JWT secrets out of committed files and logs.
